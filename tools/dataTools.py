@@ -37,6 +37,18 @@ def get_data_single_field(ticker_list, field, dates='NYSE',
         df = df.dropna()
     return df
     
+def compute_portfolio_statistics(ticker_list, allocation, dates='NYSE', 
+                                     risk_free_rate=0):
+    price_df = get_data_single_field(ticker_list, field='Adj Close', dates=dates)
+    price_df = price_df / price_df.ix[0]
+    price_df = price_df * allocation
+    price_df['Position Vals'] = price_df.sum(axis=1)
+    cum_ret = (price_df['Position Vals'][-1] / price_df['Position Vals'][0]) - 1
+    daily_rets = price_df['Position Vals'].pct_change()
+    avg_daily_ret = daily_rets[1:].mean()
+    risk = daily_rets[1:].std()
+    sharpe_ratio = np.sqrt(252) * (avg_daily_ret - risk_free_rate) / risk
+    return cum_ret, avg_daily_ret, risk, sharpe_ratio
 
 def daily_returns(df):
     daily_returns = df.copy()
