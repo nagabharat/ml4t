@@ -1,88 +1,30 @@
-# -*- coding: utf-8 -*-
+""" Script for roughwork"""
+
 #import pandas as pd
 #import matplotlib.pyplot as plt
-import tools.dataTools as dataTools
-#import tools.plotTools as plotTools
+import util.stats as stats
 import numpy as np
 
 def main():
-    
-    # Load data for specified dates
-    ticker_list = ['SPY', 'AAPL', 'GOOG']
-#    field = 'Adj Close'
-    sd = '2000-02-01'
-    ed = '2014-12-07'
-#    dates = pd.date_range(sd, ed)
-#    df = dataTools.get_data_single_field(ticker_list, field, dates=dates)
-    allocation = np.array([0.2, 0.15, 0.65])
-    start_val = 1e6
-    sampling_freq = 'W'
-    stats = dataTools.compute_portfolio_statistics(ticker_list, allocation, start_val, sd,
-                                         ed, sampling_freq=sampling_freq)
-    print(stats) 
+#    get_portfolio_stats()
+    get_optimized_portfolio()
 
-    # Get daily returns
-#    df = df.pct_change()
-#    df.ix[0] = 0
-        
-#    # Get summary stats
-#    mean = df.mean()
-#    std = df.std()
-#    kurtosis = df.kurtosis()
-#    
-#    print 'Mean: {}'.format(mean)
-#    print 'Standard deviations: {}'.format(std)
-#    print 'Kurtosis: {}'.format(kurtosis)
-    
-    # Plot histogram with summary stats
-#    df['SPY'].hist(bins=20, label='SPY', alpha=0.5)  
-#    plt.hold(True)
-#    df['AAPL'].hist(bins=20, label='AAPL', alpha=0.5)  
-#    plt.legend()
-    
-    # Linear regression
-#    X = df['SPY'].values
-#    X = np.hstack((np.ones([len(X), 1]), X[:,np.newaxis]))
-#    y = df['AAPL'].values
-#    alpha, beta = linear_regression(X, y, l=0)
-#    beta2,beta1, alpha = np.polyfit(X,y,2) 
-#    x_vals = df['SPY'].values
-#    y_vals = alpha + beta*x_vals
-    
-    # Scatter plot
-#    df.plot(kind='scatter', x='SPY', y='AAPL', lw=0)
-#    plt.plot(x_vals, y_vals, color='r', linewidth=2)
-#    plt.axis('equal')
+def get_portfolio_stats():
+    options = {'symbols' : ['SPY', 'AAPL', 'GOOG'],
+               'start_date' : '2000-02-01',
+               'end_date' : '2014-12-07',
+               'allocation' : np.array([0.2, 0.15, 0.65]),
+               'start_val' : 1e6,
+               'sampling_freq' : 'W'}
+    port_stats = stats.portfolio_statistics(**options)
+    print(port_stats)
 
-#    plt.axvline(mean, linestyle='dashed', linewidth=5, color='w')
-#    plt.axvline(mean+std, linestyle='dashed', linewidth=2, color='g')
-#    plt.axvline(mean-std, linestyle='dashed', linewidth=2, color='g')
-#    plt.legend(('mean', 'std'))
-#    plt.show()
-                                             
-#    # Plot data with rolling mean
-#    ax = df.plot(title='SPY and FAKE2')
-#    roll = df.rolling(window=20)
-#    r_mean = roll.mean()
-#    r_mean.plot(ax=ax)
-#    
-#    # Add sd bands
-#    r_std = roll.std()
-#    (r_mean + 2*r_std).plot(ax=ax)
-#    (r_mean - 2*r_std).plot(ax=ax)
-# 
-#    # Add legend   
-#    ax.legend(['SPY','Rolling mean','+2 STD','-2 STD'], loc='upper left',
-#              fontsize=7)
-#    ax.set_ylabel('Price')
-#    
-#    # Save plot / set params
-#    fig = plt.gcf()
-#    fig.set_size_inches(6,4)
-#    font = {'size' : 8,
-#            'weight' : 'normal'}
-#    plt.rc('font', **font)
-#    fig.savefig('test.pdf', dpi=600)
-    
+def get_optimized_portfolio():
+    options = {'symbols' : ['SPY', 'AAPL', 'GOOG'],
+               'start_date' : '2000-02-01',
+               'end_date' : '2014-12-07'}
+    port_stats = stats.optimize_portfolio(**options)
+    print(port_stats)
+
 if __name__ == '__main__':
     main()
