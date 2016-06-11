@@ -1,15 +1,16 @@
 """ Tools for doing stats on portfolios."""
 
 from datetime import timedelta
-import util.data_tools as data_tools
+import util.data as data_tools
 
 import pandas as pd
 import numpy as np
 from scipy.optimize import minimize
 
+
 def portfolio_statistics(symbols, allocation, start_val,
-                            start_date='2000-02-01', end_date='2012-09-12',
-                            risk_free_rate=0, sampling_freq='D'):
+                         start_date='2000-02-01', end_date='2012-09-12',
+                         risk_free_rate=0, sampling_freq='D'):
     """ Return portfolio statistics for specified tickers and dates."""
 
     # Get dates and ensure they start on a monday
@@ -21,7 +22,7 @@ def portfolio_statistics(symbols, allocation, start_val,
     # Get adjustment constant (depends on sampling frequency)
     adj_factor = {'D': np.sqrt(252),
                   'W': np.sqrt(52),
-                  'M' : np.sqrt(12)}
+                  'M': np.sqrt(12)}
 
     # Normalise data frame, and assign allocations.
     price_df = price_df / price_df.ix[0]
@@ -38,10 +39,14 @@ def portfolio_statistics(symbols, allocation, start_val,
     sharpe_ratio = (adj_factor[sampling_freq] *
                     (avg_daily_ret - risk_free_rate) / risk_adjusted)
 
-    return cum_ret, avg_daily_ret, risk, sharpe_ratio, end_val
+    # Collect results in dictionary
+    stats = {'cum_ret': cum_ret, 'avg_daily_ret': avg_daily_ret, 'risk': risk,
+             'sharpe_ratio': sharpe_ratio, 'end_val': end_val}
 
-def optimize_portfolio(symbols, start_date, end_date,
-                          risk_free_rate=0):
+    return stats
+
+
+def optimize_portfolio(symbols, start_date, end_date, risk_free_rate=0):
     """ TODO: Write docstring"""
 
     # Read in adjusted closing prices for given symbols, date range
@@ -61,17 +66,16 @@ def optimize_portfolio(symbols, start_date, end_date,
     # Optimize allocation to maximize sharpe ratio
     price_df = price_df / price_df.ix[0]
     n_symbols = len(symbols)
-    constraints = ({'type' : 'eq', 'fun' : lambda alloc: 1 - alloc.sum()})
-    options = {'fun' : neg_sharpe_ratio,
-               'x0' : np.ones(n_symbols) / n_symbols,
-               'args' : (price_df),
-               'method' : 'SLSQP',
-               'bounds' : [(0, 1) for s in range(n_symbols)],
-               'constraints' : constraints,
-               'options' : {'disp' : False}}
+    constraints = ({'type': 'eq', 'fun': lambda alloc: 1 - alloc.sum()})
+    options = {'fun': neg_sharpe_ratio,
+               'x0': np.ones(n_symbols) / n_symbols,
+               'args': (price_df),
+               'method': 'SLSQP',
+               'bounds': [(0, 1) for s in range(n_symbols)],
+               'constraints': constraints,
+               'options': {'disp': False}}
     res = minimize(**options)
     allocs = res.x
-    cum_ret, avg_daily_ret, risk, sharpe_ratio, end_val = \
-        portfolio_statistics(symbols, allocs, 1, start_date, end_date)
+    stats = portfolio_statistics(symbols, allocs, 1, start_date, end_date)
 
-    return allocs, cum_ret, avg_daily_ret, risk, sharpe_ratio
+    return allocs, stats
